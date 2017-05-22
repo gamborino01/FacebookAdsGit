@@ -10,6 +10,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.facebook.CallbackManager;
@@ -21,6 +23,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import com.facebook.FacebookSdk;
+import com.google.android.gms.ads.MobileAds;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,36 +37,53 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
+        // Initialize the Mobile Ads SDK.
+        MobileAds.initialize(this, getResources().getString(R.string.id_app));
         adView = (AdView) findViewById(R.id.ad_view);
 
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
+        AdRequest adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
+
         adView.loadAd(adRequest);
+
+        final ImageView success = (ImageView) findViewById(R.id.success);
+        final ImageView fail = (ImageView) findViewById(R.id.fail);
+        success.setVisibility(View.INVISIBLE);
+        fail.setVisibility(View.INVISIBLE);
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         cM = CallbackManager.Factory.create();
 
         getFbKeyHash("1mZyNizgjQGam3Hw3SN50MzARiY=");
 
-        setContentView(R.layout.activity_main);
 
         lB = (LoginButton)findViewById(R.id.login_button);
 
         lB.registerCallback(cM, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Toast.makeText(MainActivity.this, "Â¡Inicio de sesiÃ³n exitoso!", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "¡Inicio de sesion exitoso!", Toast.LENGTH_LONG).show();
+                if(fail.getVisibility()==View.VISIBLE)
+                    fail.setVisibility(View.INVISIBLE);
+                success.setVisibility(View.VISIBLE);
+
             }
 
             @Override
             public void onCancel() {
-                Toast.makeText(MainActivity.this, "Â¡Inicio de sesiÃ³n cancelado!", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "¡Inicio de sesion cancelado!", Toast.LENGTH_LONG).show();
+                if(success.getVisibility()==View.VISIBLE)
+                    success.setVisibility(View.INVISIBLE);
+                fail.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onError(FacebookException error) {
-                Toast.makeText(MainActivity.this, "Â¡Inicio de sesiÃ³n NO exitoso!", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "¡Inicio de sesion NO exitoso!", Toast.LENGTH_LONG).show();
+                if(success.getVisibility()==View.VISIBLE)
+                    success.setVisibility(View.INVISIBLE);
+                fail.setVisibility(View.VISIBLE);
             }
         });
     }
